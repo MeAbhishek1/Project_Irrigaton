@@ -1,4 +1,4 @@
-//including library
+///including library
 #include<TimeLib.h>
 #include<time.h>
 #include<Wire.h>
@@ -61,12 +61,13 @@ WiFiServer server(80);
 ///////////////////////////////////////////////
 
 void setup() {
+    Serial.begin(9600);
+  Serial.println("");
 ///////////////////pin setup//////////////
   pinMode(Moisture_Water,INPUT);
   pinMode(motor,OUTPUT);
   
-  Serial.begin(9600);
-  Serial.println("");
+
   
 ////////////// connecting  to WIFI network//////////////
   Serial.print("Connecting to ");
@@ -100,9 +101,11 @@ void setup() {
   Serial.println("Please enter the Latitude Location");
   while(Serial.available()==0){}
   loc_lat=Serial.readString();
+  loc_lat.replace("\n","");
   Serial.println("Please enter the Longitude Location");
   while(Serial.available()==0){}
   loc_lon=Serial.readString();
+  loc_lon.replace("\n","");
   Serial.println("Please Enter the Date:(ddmmyyyy) ");
   while(Serial.available()==0){}
   date=Serial.readString();
@@ -135,7 +138,8 @@ void setup() {
 void loop() {
   /////////////////  Continuously reading the sensor data       ///////////
 Moist_Value=analogRead(Moisture_Water);
-
+Serial.print("\nMoisture_val from sensor= ");
+Serial.println(Moist_Value);
 ////////////////////  WEb page nad server  configuration   //////////////////
 WiFiClient client = server.available(); ;
 
@@ -148,6 +152,8 @@ client.println("<html>");
 client.println("<head>");
 client.println("<title>Automation</title>");
 client.println("</head>");
+client.println(".button {border: none; color: white; padding: 10px 20px; text-align: center;");
+ client.println(".button1 {background-color: #13B3F0;}");
 client.println("<body>");
 client.println("<h1>Farm automation and Monitoring</h1>");
 client.println("<hr>");
@@ -184,7 +190,7 @@ client.println("<li>Light Condition: ");
 client.print(Light_val);
 client.println("</li>");
 client.println("<li>Moisture: ");
-client.print(Moist_val);
+client.print(Moist_Value);
 client.println("</li>");
 client.println("<li>Humidity: ");
 client.print(Humid_val);
@@ -211,6 +217,7 @@ client.println(time_elap);
 client.println(" days");
 client.println("</li>");
 client.println("</ul");
+client.print("<p><button class=\"button button1\">Emergency Stop</button></a></p>");
 client.println("</body></html>");
 
 ///////////////////////       HTML part Ends ///////////////////////
@@ -231,15 +238,15 @@ client.println("</body></html>");
     HTTPClient http;
     http.begin(client, "http://"+servername +"/data/2.5/weather?lat="+loc_lat+"&lon="+loc_lon+"&units=metric&APPID="+apikey);
     Serial.println("");
-    Serial.println( servername +"/data/2.5/weather?lat="+loc_lat+"&lon="+loc_lon+"&units=metric&APPID="+apikey);
+    //Serial.println( servername +"/data/2.5/weather?lat="+loc_lat+"&lon="+loc_lon+"&units=metric&APPID="+apikey);
     http.GET();
-    Serial.print(http.getString());
+    //Serial.print(http.getString());
     String result=http.getString();
     http.end();
 
   ////////////////////////// Parsing the JSON data from API /////////////
-  Serial.println("Result= ");
-  Serial.println(result);
+  //Serial.println("Result= ");
+  //Serial.println(result);
   DynamicJsonDocument doc(1024);
   DeserializationError error = deserializeJson(doc, result);
 
@@ -251,7 +258,7 @@ client.println("</body></html>");
   }
   // Assigning the data from API ////
   Temp_val = doc["main"]["temp"].as<String>(); 
-  Light_val = doc["weather"]["description"].as<String>(); 
+  Light_val = doc["weather"][0]["description"].as<String>(); 
   Humid_val = doc["main"]["humidity"].as<String>(); 
   Rain_val = doc["clouds"]["all"].as<String>(); 
   Place_Name=doc["name"].as<String>();
@@ -266,7 +273,7 @@ client.println("</body></html>");
   int hours = diff / 3600;
   time_elap=hours/24;
   Serial.println("elap_time "+String(time_elap));
-
+  client.stop();
 ///////////////////////////////////////////////////////////Logic Control////////////////////////////////////////////////
 
 /////////////////////////////variable condition setup///////////////
