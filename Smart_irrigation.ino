@@ -1,4 +1,4 @@
-///including library
+//including library
 #include<TimeLib.h>
 #include<time.h>
 #include<Wire.h>
@@ -152,8 +152,10 @@ client.println("<html>");
 client.println("<head>");
 client.println("<title>Automation</title>");
 client.println("</head>");
+client.println("<style>");
 client.println(".button {border: none; color: white; padding: 10px 20px; text-align: center;");
  client.println(".button1 {background-color: #13B3F0;}");
+ client.println("</style>");
 client.println("<body>");
 client.println("<h1>Farm automation and Monitoring</h1>");
 client.println("<hr>");
@@ -168,6 +170,7 @@ client.print(soil_type);
 client.println("</li>");
 client.print("<li>Field area: ");
 client.print(land_area);
+client.println("m2");
 client.println("</li>");
 client.println("<li>Place: ");
 client.print(Place_Name);
@@ -191,6 +194,7 @@ client.print(Light_val);
 client.println("</li>");
 client.println("<li>Moisture: ");
 client.print(Moist_Value);
+client.println("mm");
 client.println("</li>");
 client.println("<li>Humidity: ");
 client.print(Humid_val);
